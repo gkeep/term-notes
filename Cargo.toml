@@ -1,0 +1,10 @@
+[package]
+name = "notes"
+version = "0.1.0"
+authors = ["gkeep"]
+edition = "2018"
+
+[dependencies]
+# move to yaml whenever 3.0 is released
+clap = "2.33.0"
+open = "1.4.0"

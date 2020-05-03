@@ -1,2 +1,5 @@
-# rust-terminal-notes-and-reminders
- TODO: CREATE A PROPER NAME
+# term-notes
+ #### TODO:
+ - [ ] CREATE A PROPER NAME
+ - [ ] Make notes folder location configurable
+ - [ ] Note per file
