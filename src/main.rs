@@ -54,7 +54,7 @@ fn print_notes(filename: &str, print_body: bool) {
     let reader = BufReader::new(file);
     let mut note_index = 0;
 
-    for (_index, line) in reader.lines().enumerate() {
+    for line in reader.lines() {
         let line = line.unwrap();
         if !line.contains("    ") && line != "" {
             note_index += 1;
