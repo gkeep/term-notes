@@ -1,33 +1,37 @@
-use clap::{Arg, App};
-use std::{fs, env, fs::File};
+use clap::{App, Arg};
 use std::io::{BufRead, BufReader};
+use std::{env, fs, fs::File};
 extern crate open;
 
 fn main() {
     let m = App::new("notes")
-                    .version("0.1")
-                    .author("gkeep")
-                    .about("Notes in your terminal!")
-                    .arg(Arg::with_name("print")
-                        .short("p")
-                        .long("print")
-                        .help("Print notes with or without body")
-                        .possible_values(&["head", "body"])
-                        .required(false)
-                        .takes_value(true))
-                    .arg(Arg::with_name("edit")
-                        .short("e")
-                        .long("edit")
-                        .help("Edit notes")
-                        .takes_value(false))
-                    .get_matches();
+        .version("0.1")
+        .author("gkeep")
+        .about("Notes in your terminal!")
+        .arg(
+            Arg::with_name("print")
+                .short("p")
+                .long("print")
+                .help("Print notes with or without body")
+                .possible_values(&["head", "body"])
+                .required(false)
+                .takes_value(true),
+        )
+        .arg(
+            Arg::with_name("edit")
+                .short("e")
+                .long("edit")
+                .help("Edit notes")
+                .takes_value(false),
+        )
+        .get_matches();
 
-    // Custom notes location
-    let notes_custom_location ;
+    // Custom location of notes
+    let notes_custom_location;
     match env::var("notes_custom_location") {
         Ok(val) => {
             notes_custom_location = val;
-        },
+        }
         _ => {
             let home_folder = env::var("HOME").unwrap();
             notes_custom_location = format!("{}/Notes", home_folder);
@@ -57,12 +61,11 @@ fn main() {
 
             note_index += 1;
         }
-    }
-    else if m.is_present("edit") {
+    } else if m.is_present("edit") {
         match env::var("EDITOR") {
             Ok(val) => {
                 open::with("Notes/1.txt", val).expect("Couldn't open the editor");
-            },
+            }
             Err(e) => println!("Couldn't open editor ($EDITOR env variable): {}", e),
         }
     }
