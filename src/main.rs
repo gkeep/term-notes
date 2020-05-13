@@ -1,6 +1,8 @@
 use clap::{App, Arg};
 use std::io::{BufRead, BufReader};
 use std::{env, fs, fs::File};
+use std::path::Path;
+use std::ffi::OsStr;
 extern crate open;
 
 fn main() {
@@ -31,8 +33,9 @@ fn main() {
         }
     }
 
+    let notes_folder = fs::read_dir(notes_custom_location).unwrap();
+
     if m.is_present("print") {
-        let notes_folder = fs::read_dir(notes_custom_location).unwrap();
         let mut note_index = 1;
 
         println!("Your notes:");
@@ -40,6 +43,9 @@ fn main() {
         for file in notes_folder {
             let file_loc = file.unwrap().path().to_string_lossy().to_string();
 
+            if !(Path::new(&file_loc).extension().and_then(OsStr::to_str) == Some("txt")) {
+                continue;
+            }
             match m.value_of("print").unwrap() {
                 "head" => {
                     print_notes(file_loc, false, note_index);
