@@ -17,13 +17,6 @@ fn main() {
                 .required(false)
                 .takes_value(true),
         )
-        .arg(
-            Arg::with_name("edit")
-                .short("e")
-                .long("edit")
-                .help("Edit notes")
-                .takes_value(false),
-        )
         .get_matches();
 
     // Custom location of notes
@@ -60,13 +53,6 @@ fn main() {
             }
 
             note_index += 1;
-        }
-    } else if m.is_present("edit") {
-        match env::var("EDITOR") {
-            Ok(val) => {
-                open::with("Notes/1.txt", val).expect("Couldn't open the editor");
-            }
-            Err(e) => println!("Couldn't open editor ($EDITOR env variable): {}", e),
         }
     }
 }
