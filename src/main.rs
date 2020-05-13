@@ -1,6 +1,5 @@
 use clap::{Arg, App};
-use std::env;
-use std::fs::File;
+use std::{fs, env, fs::File};
 use std::io::{BufRead, BufReader};
 extern crate open;
 
@@ -23,20 +22,40 @@ fn main() {
                         .takes_value(false))
                     .get_matches();
 
+    // Custom notes location
+    let notes_custom_location ;
+    match env::var("notes_custom_location") {
+        Ok(val) => {
+            notes_custom_location = val;
+        },
+        _ => {
+            let home_folder = env::var("HOME").unwrap();
+            notes_custom_location = format!("{}/Notes", home_folder);
+        }
+    }
+
     if m.is_present("print") {
-        let file = "Notes/1.txt";
-        match m.value_of("print").unwrap() {
-            "head" => {
-                println!("Your notes:");
-                print_notes(file, false);
+        let notes_folder = fs::read_dir(notes_custom_location).unwrap();
+        let mut note_index = 1;
+
+        println!("Your notes:");
+
+        for file in notes_folder {
+            let file_loc = file.unwrap().path().to_string_lossy().to_string();
+
+            match m.value_of("print").unwrap() {
+                "head" => {
+                    print_notes(file_loc, false, note_index);
+                }
+                "body" => {
+                    print_notes(file_loc, true, note_index);
+                }
+                _ => {
+                    println!("ERROR: Couldn't read notes!");
+                }
             }
-            "body" => {
-                println!("Your notes:");
-                print_notes(file, true);
-            }
-            _ => {
-                println!("ERROR: Couldn't read notes!");
-            }
+
+            note_index += 1;
         }
     }
     else if m.is_present("edit") {
@@ -49,16 +68,14 @@ fn main() {
     }
 }
 
-fn print_notes(filename: &str, print_body: bool) {
+fn print_notes(filename: String, print_body: bool, index: i32) {
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
-    let mut note_index = 0;
 
     for line in reader.lines() {
         let line = line.unwrap();
         if !line.contains("    ") && line != "" {
-            note_index += 1;
-            println!("    {}: {}", note_index, line);
+            println!("    {}: {}", index, line);
         } else {
             if print_body {
                 println!("    {}", line);
