@@ -21,7 +21,7 @@ fn main() {
 
     // Custom location of notes
     let notes_custom_location;
-    match env::var("notes_custom_location") {
+    match env::var("NOTES_CUSTOM_LOCATION") {
         Ok(val) => {
             notes_custom_location = val;
         }
