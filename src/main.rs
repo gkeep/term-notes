@@ -1,88 +1,87 @@
 use clap::{App, Arg};
+use dirs;
+use std::fs::File;
 use std::io::{BufRead, BufReader};
-use std::{env, fs, fs::File};
-use std::path::Path;
-use std::ffi::OsStr;
-extern crate open;
+use std::path::{Path, PathBuf};
 
 fn main() {
     let m = App::new("notes")
-        .version("0.1")
+        .version("0.2.0")
         .author("gkeep")
         .about("Notes in your terminal!")
         .arg(
-            Arg::with_name("print")
-                .short("p")
-                .long("print")
-                .help("Print notes with or without body")
-                .possible_values(&["head", "body"])
+            Arg::with_name("local")
+                .short("l")
+                .long("local")
+                .help("Read notes from current directory")
                 .required(false)
-                .takes_value(true),
+                .takes_value(false),
+        )
+        .arg(
+            Arg::with_name("body")
+                .short("b")
+                .long("with-body")
+                .help("Print notes with body")
+                .required(false)
+                .takes_value(false),
         )
         .get_matches();
 
-    // Custom location of notes
-    let notes_custom_location;
-    match env::var("NOTES_CUSTOM_LOCATION") {
-        Ok(val) => {
-            notes_custom_location = val;
-        }
-        _ => {
-            let home_folder = env::var("HOME").unwrap();
-            notes_custom_location = format!("{}/Notes", home_folder);
+    /*
+     * Notes location
+     * --local to read from .notes subfolder in current directory
+     * Default location for notes is /home/<user>/.local/Notes/notes.dat
+     */
+    let home_folder = dirs::home_dir().unwrap();
+    let mut notes_location = Path::new(&home_folder).join(".local/Notes/notes.dat");
+
+    /*
+    ! move to add subcommand
+    if !Path::exists(notes_location) {
+        fs::create_dir(notes_location);
+    }
+    */
+    if m.is_present("local") {
+        // Local notes
+        if Path::new(".notes/notes.dat").exists() {
+            notes_location = PathBuf::from(".notes/notes.dat");
+        } else {
+            println!("No notes in this folder!");
+            std::process::exit(0);
         }
     }
 
-    let notes_folder = fs::read_dir(notes_custom_location).unwrap();
+    println!("Your notes:");
 
-    if m.is_present("print") {
-        let mut note_index = 1;
+    let note_file = notes_location.to_str().unwrap();
 
-        println!("Your notes:");
-
-        for file in notes_folder {
-            let file_loc = file.unwrap().path().to_string_lossy().to_string();
-
-            if !(Path::new(&file_loc).extension().and_then(OsStr::to_str) == Some("txt")) {
-                continue;
-            }
-
-            print!("  {}:", note_index);
-
-            match m.value_of("print").unwrap() {
-                "head" => {
-                    print_notes(file_loc, false);
-                }
-                "body" => {
-                    print_notes(file_loc, true);
-                }
-                _ => {
-                    println!("ERROR: Couldn't read notes!");
-                }
-            }
-
-            note_index += 1;
-        }
+    if m.is_present("body") {
+        print_notes(note_file, true);
+    } else {
+        // Print without body by default
+        print_notes(note_file, false);
     }
 }
 
-fn print_notes(filename: String, print_body: bool) {
+fn print_notes(filename: &str, print_body: bool) {
+    /*
+     * print_notes
+     * Prints notes from a specific file (filename)
+     * print_body specifies whether to print note's body or not
+     */
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
+    let mut index = 1;
 
-    for (index, line) in reader.lines().enumerate() {
+    for line in reader.lines() {
         let line = line.unwrap();
 
         if line != "" {
             if !line.contains("    ") {
-                if index > 1 {
-                    println!("      {}", line);
-                    continue;
-                }
-                println!("  {}", line);
-            }
-            else if print_body {
-                println!("     {}", line);
+                println!("  {}: {}", index, line);
+                index += 1;
+            } else if print_body {
+                println!("   {}", line);
             }
         }
     }
