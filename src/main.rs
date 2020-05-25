@@ -5,8 +5,8 @@ use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
 fn main() {
-    let m = App::new("notes")
-        .version("0.2.0")
+    let matches = App::new("notes")
+        .version("0.2.1")
         .author("gkeep")
         .about("Notes in your terminal!")
         .arg(
@@ -41,7 +41,7 @@ fn main() {
         fs::create_dir(notes_location);
     }
     */
-    if m.is_present("local") {
+    if matches.is_present("local") {
         // Local notes
         if Path::new(".notes/notes.dat").exists() {
             notes_location = PathBuf::from(".notes/notes.dat");
@@ -51,11 +51,9 @@ fn main() {
         }
     }
 
-    println!("Your notes:");
-
     let note_file = notes_location.to_str().unwrap();
 
-    if m.is_present("body") {
+    if matches.is_present("body") {
         print_notes(note_file, true);
     } else {
         // Print without body by default
@@ -68,7 +66,7 @@ fn print_notes(filename: &str, print_body: bool) {
      * print_notes
      * Prints notes from a specific file (filename)
      * print_body specifies whether to print note's body or not
-     */
+    */
     let file = File::open(filename).unwrap();
     let reader = BufReader::new(file);
     let mut index = 1;
@@ -81,7 +79,7 @@ fn print_notes(filename: &str, print_body: bool) {
                 println!("  {}: {}", index, line);
                 index += 1;
             } else if print_body {
-                println!("   {}", line);
+                println!("     {}", line);
             }
         }
     }
