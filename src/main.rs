@@ -4,11 +4,17 @@ use std::fs::File;
 use std::io::{BufRead, BufReader};
 use std::path::{Path, PathBuf};
 
+mod modify;
+
 fn main() {
     let matches = App::new("notes")
         .version("0.2.1")
         .author("gkeep")
         .about("Notes in your terminal!")
+        .subcommand(
+            App::new("add")
+            .about("Add notes")
+        )
         .arg(
             Arg::with_name("local")
                 .short("l")
@@ -35,12 +41,6 @@ fn main() {
     let home_folder = dirs::home_dir().unwrap();
     let mut notes_location = Path::new(&home_folder).join(".local/Notes/notes.dat");
 
-    /*
-    ! move to add subcommand
-    if !Path::exists(notes_location) {
-        fs::create_dir(notes_location);
-    }
-    */
     if matches.is_present("local") {
         // Local notes
         if Path::new(".notes/notes.dat").exists() {
@@ -51,7 +51,15 @@ fn main() {
         }
     }
 
+    if matches.is_present("add") {
+        modify::add_note(&notes_location);
+    }
+
     let note_file = notes_location.to_str().unwrap();
+
+    modify::delete_note(&notes_location);
+
+    println!("Your notes:");
 
     if matches.is_present("body") {
         print_notes(note_file, true);
