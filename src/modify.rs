@@ -13,16 +13,33 @@ pub fn add_note(file_location: &Path) {
         .open(file_location)
         .unwrap();
 
-    print!("Note title: ");
-
-    let mut note_title = String::new();
+    print!("New note: ");
     // Print user input on the same line
     let _ = io::stdout().flush();
 
-    io::stdin().read_line(&mut note_title).expect("Could not read note title!");
+    let mut note_title = String::new();
+    io::stdin().read_line(&mut note_title).expect("Could not read note title!"); // Read note title
 
-    file.write_all(note_title.as_bytes()).expect("Could not write note title to the notes.dat file!");
-    // TODO: Add creation of note body
+    // If input is empty, return
+    if note_title.len() <= 1 {
+        println!("No note title provided! Exiting...");
+        return;
+    }
+
+    print!("Body: ");
+    let _ = io::stdout().flush();
+
+    let mut note_body_inp = String::new().to_owned();
+    io::stdin().read_line(&mut note_body_inp).expect("Could not read note body!");
+
+    // If input is empty, return
+    if note_body_inp.len() <= 1 {
+        return;
+    }
+
+    let mut note_body = String::from("    ").to_owned(); // Body starts with 4 spaces
+    note_body.push_str(&note_body_inp); // Combine input with line offset
+    file.write_all(note_body.as_bytes()).expect("Could not write note body to the notes.dat file!"); // Write it
 }
 
 pub fn delete_note(file_location: &Path) {

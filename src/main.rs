@@ -84,10 +84,10 @@ fn print_notes(filename: &str, print_body: bool) {
 
         if line != "" {
             if !line.contains("    ") {
-                println!("  {}: {}", index, line);
+                println!(" {}: {}", index, line);
                 index += 1;
             } else if print_body {
-                println!("     {}", line);
+                println!("{}", line);
             }
         }
     }
